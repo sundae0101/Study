@@ -19,8 +19,7 @@
 
 
 def start_input():
-    print("Entering -1 means that no minterms or don't-care terms")
-    print("Please input all 4-variable minterm (0~15) or None")
+    print("\n\nPlease input all 4-variable minterm (0~15) or None")
     list_minterm = list(map(int, input().split()))
     if (list_minterm):
         if (max(list_minterm) > 15 or min(list_minterm) < 0): 
@@ -98,7 +97,11 @@ def list_binary_to_char(List): #binary list를 문자 list로 변환
         
     return new_list
     
-    
+def list_to_string_comma(List):
+    new_list = List[:]
+    String = "".join(new_list)
+    return String
+
 def print_implicant_chart(list_minterm):
     print()
     print(" "*30, end = '| ')
@@ -110,7 +113,12 @@ def print_implicant_chart(list_minterm):
     print("-" * (len(list_minterm)*3 + 2), end = '\n')
     
     for line in range(PI_count):
-        print("{0} {1}".format(list_PI[line][0], list_PI[line][1]).rjust(30), end = '| ')
+        if (line in list_Index):
+            print(">>> {0} {1}".format(list_PI[line][0], list_to_string_comma(list_PI[line][1])).rjust(30), end = '| ')
+        
+        else:
+            print("{0} {1}".format(list_PI[line][0], list_to_string_comma(list_PI[line][1])).rjust(30), end = '| ')
+            
         for row in range(len(list_minterm)):
             if list_minterm[row] in list_PI[line][0]:
                 if list_minterm[row] in list_ESP:
@@ -125,8 +133,6 @@ def print_implicant_chart(list_minterm):
         print()
             
                 
-        
-    
 
 
 #################
@@ -231,7 +237,7 @@ list_ESP = []
 index = -1
 
 Result = []
-
+list_Index = []
 
 for element in list_minterm:
     dict_minterm_check[element] = 1
@@ -257,6 +263,8 @@ for element in list_minterm: # 이 logic을 통해 어떤 minterm 하나에 대�
 for element in list_ESP:
     
     # 9 -> 0
+    list_Index.append(dict_element_to_track_PI[element][0])
+    
     list_num_element = list_PI[dict_element_to_track_PI[element][0]][0]
     Result.append(list_PI[dict_element_to_track_PI[element][0]][1])
     
@@ -275,6 +283,8 @@ for element in list_ESP:
                 
 # 이후 그리디 방식으로, 남은 항이 제일 많은 주항을 골라 차례대로 제거해간다.
 
+
+
 while(1):
     
     if (sum(dict_minterm_check.values()) == 0):
@@ -291,17 +301,25 @@ while(1):
                 
     list_PI[index][2] = 0
     Result.append(list_PI[index][1])
-    
+    list_Index.append(index)
     for element in list_PI[index][0]: # 5, 7
         if element in list_DC: #don't care 항은 무시
             continue
+        
+        
+        
         dict_minterm_check[element] = 0
         for PI_index in dict_element_to_track_PI[element]: # 5 -> index 3, 4 추출
             if (list_PI[PI_index][2]): # 아직까지 항이 남아있을경우 
                 list_PI[PI_index][2] -= 1
+                
 
+
+
+print("\n")
 for i in Result:
     print_list(i)
     print(end = ' ')
-    
+print("\n")
 print_implicant_chart(list_minterm)
+print("\n\n")
